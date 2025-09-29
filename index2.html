@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Aplikasi Manajemen Tugas</title>
+
+  <!-- ✅ SEO Tags -->
+  <meta name="description" content="Aplikasi manajemen tugas online dengan kategori, deadline, dan statistik. Buat, tandai, dan kelola tugas harianmu dengan mudah." />
+  <meta name="keywords" content="manajemen tugas, todo list, aplikasi produktivitas, JavaScript, tugas harian" />
+  <meta name="author" content="Nama Kamu" />
+  <meta name="robots" content="index, follow" />
+
+  <!-- ✅ Favicon (opsional) -->
+  <link rel="icon" href="favicon.ico" type="image/x-icon" />
+
+  <style>
+    body {
+      font-family: sans-serif;
+      background: #f0f0f0;
+      padding: 20px;
+    }
+    .container {
+      max-width: 600px;
+      margin: auto;
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+    }
+    h1 {
+      text-align: center;
+    }
+    form {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+    input, select, button {
+      padding: 10px;
+      font-size: 1em;
+    }
+    input[type="text"] {
+      flex: 2;
+    }
+    select, input[type="date"] {
+      flex: 1;
+    }
+    ul {
+      list-style: none;
+      padding: 0;
+    }
+    li {
+      background: #eee;
+      margin-bottom: 10px;
+      padding: 10px;
+      border-radius: 4px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .done {
+      text-decoration: line-through;
+      color: gray;
+    }
+    #stats {
+      margin-top: 10px;
+      font-weight: bold;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Manajemen Tugas</h1>
+    <form id="task-form">
+      <input type="text" id="task-input" placeholder="Tugas baru..." required />
+      <select id="category-input">
+        <option value="Kerja">Kerja</option>
+        <option value="Pribadi">Pribadi</option>
+        <option value="Belajar">Belajar</option>
+      </select>
+      <input type="date" id="deadline-input" />
+      <button type="submit">Tambah</button>
+    </form>
+    <ul id="task-list"></ul>
+    <div id="stats"></div>
+  </div>
+
+  <script>
+    const form = document.getElementById('task-form');
+    const input = document.getElementById('task-input');
+    const category = document.getElementById('category-input');
+    const deadline = document.getElementById('deadline-input');
+    const list = document.getElementById('task-list');
+    const stats = document.getElementById('stats');
+
+    let tasks = JSON.parse(localStorage.getItem('tasks')) || [];
+
+    function saveTasks() {
+      localStorage.setItem('tasks', JSON.stringify(tasks));
+    }
+
+    function renderTasks() {
+      list.innerHTML = '';
+      tasks.forEach((task, i) => {
+        const li = document.createElement('li');
+        li.innerHTML = `
+          <div>
+            <input type="checkbox" ${task.completed ? 'checked' : ''} onchange="toggle(${i})" />
+            <span class="${task.completed ? 'done' : ''}">${task.text}</span>
+            <small> [${task.category}] ${task.deadline || ''}</small>
+          </div>
+          <button onclick="remove(${i})">🗑️</button>
+        `;
+        list.appendChild(li);
+      });
+      renderStats();
+    }
+
+    function renderStats() {
+      const total = tasks.length;
+      const done = tasks.filter(t => t.completed).length;
+      stats.textContent = `Total: ${total} | Selesai: ${done}`;
+    }
+
+    form.onsubmit = e => {
+      e.preventDefault();
+      const newTask = {
+        text: input.value.trim(),
+        category: category.value,
+        deadline: deadline.value,
+        completed: false
+      };
+      tasks.push(newTask);
+      saveTasks();
+      input.value = '';
+      renderTasks();
+    };
+
+    window.toggle = i => {
+      tasks[i].completed = !tasks[i].completed;
+      saveTasks();
+      renderTasks();
+    };
+
+    window.remove = i => {
+      tasks.splice(i, 1);
+      saveTasks();
+      renderTasks();
+    };
+
+    renderTasks();
+  </script>
+</body>
+</html>
